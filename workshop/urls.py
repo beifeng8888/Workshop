@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from apps.QA.views import ChatView, get_ai_response
+from apps.users.views import user_login, user_logout
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/',user_login,name='login'),
+    path('logout/',user_logout,name='dashboard'),
+    path('',ChatView.as_view(),name='chat'),
+    path('api/get-ai-response/',get_ai_response,name='get_ai_response'),
 ]

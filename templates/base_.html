@@ -1,0 +1,18 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Default Title{% endblock %}</title>
+    {% block css %}{% endblock %}
+</head>
+<body>
+    {% include "partials/header.html" %}
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% include "partials/footer.html" %}
+    {% block js %}{% endblock %}
+</body>
+</html>

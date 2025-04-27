@@ -9,12 +9,12 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+sys.path.insert(0, str(BASE_DIR/'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'QA',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +124,22 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#配置使用自定义的User模型
+AUTH_USER_MODEL = 'users.User'
+#禁用默认的User模型
+ADMIN_REORDER = (
+    ('users', ('User',)),
+)
+
+LOGIN_URL = '/login/'#未登陆用户重定向地址
+LOGIN_REDIRECT_URL = '/dashboard/'#登陆后默认跳转
+SESSION_COOKIE_NAME = '1209600'#Session有效期（秒）
+
+
+ #======== Admin 后台配置 ========
+ADMIN_REORDER = (
+    ('users', ('User',)),
+)
+
+DEEPSEEK_API_KEY = "sk-2fa6f643158245a5bd879ade436b4fdc"

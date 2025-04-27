@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+    .ai-panel {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+    }
+    #chat-history {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 5px;
+        min-height: 300px;
+        max-height: 70vh;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .user-message, .ai-message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .user-message {
+        background: #e3f2fd;
+        border-left: 3px solid #2196f3;
+    }
+    .ai-message {
+        background: #f1f1f1;
+        border-left: 3px solid #607d8b;
+    }
+    .time {
+        font-size: 0.8em;
+        color: #6c757d;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .input-container {
+        margin-top: auto;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="row" style="height: 100vh;width:33%">
+    <div class="col-md-4 ai-panel p-3">
+        <h2 class="mb-3">编程助手</h2>
+        <div id="chat-history">
+            <div class="ai-message">
+                <span class="time">系统</span>
+                <strong>AI:</strong> 您好！我是编程助手，请问有什么可以帮助您？
+            </div>
+        </div>
+        <div class="input-container">
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="请输入你的问题...">
+                <button id="send-btn" class="btn btn-primary">发送</button>
+            </div>
+        </div>
+    </div>
+    <!--<div class="col-md-8 code-panel p-0">
+        <iframe src="http://your-code-server-url/" style="height: 100%; width: 100%; border: none;"></iframe>
+    </div>-->
+</div>
+
+<script>
+$(document).ready(function(){
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function sendQuestion(){
+        const question = $('#user-input').val().trim();
+        if(!question) return;
+
+        const time = new Date().toLocaleTimeString();
+        $('#chat-history').append(`
+            <div class="user-message">
+                <span class="time">${time}</span>
+                <strong>You:</strong> ${escapeHtml(question)}
+            </div>
+        `);
+        $('#user-input').val('');
+        $('#chat-history').scrollTop($('#chat-history')[0].scrollHeight);
+
+        $.ajax({
+            url: '/api/get-ai-response/',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            headers: { 'X-CSRFToken': csrftoken },
+            data: {question: question},
+            success: function(data) {
+                if (!data.answer) throw new Error("无效的响应格式");
+                $('#chat-history').append(`
+                    <div class="ai-message">
+                        <span class="time">${new Date().toLocaleTimeString()}</span>
+                        <strong>AI:</strong>${escapeHtml(data.answer)}</div>
+                    </div>
+                `);
+                $('#chat-history').scrollTop($('#chat-history')[0].scrollHeight);
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.error || xhr.statusText;
+                $('#chat-history').append(`
+                    <div class="error-message">
+                        ${escapeHtml('错误: 服务暂不可用，请稍后再试' + errorMsg)}
+                    </div>
+                `);
+            }
+        });
+    }
+
+    $('#send-btn').click(sendQuestion);
+    $('#user-input').keypress(function(e){
+        if(e.which === 13) sendQuestion();
+    });
+    $('#user-input').focus();
+});
+</script>
+{% endblock %}

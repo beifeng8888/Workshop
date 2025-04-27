@@ -1,0 +1,19 @@
+ÍapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workshop-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: workshop-web
+  template:
+    metadata:
+      labels:
+        app: workshop-web
+    spec:
+      containers:
+      - name: web
+        image: your-registry/workshop-web:latest
+        ports:
+          - containerPort: 8000

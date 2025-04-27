@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app                 # 代码热更新
+      - static_volume:/app/static  # 静态文件持久化
+    env_file:
+      - .env                   # 环境变量注入
+    depends_on:
+      - db                     # 数据库依赖
+
+  db:                          # PostgreSQL数据库服务
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: workshop_user
+      POSTGRES_PASSWORD: workshop_pass
+      POSTGRES_DB: workshop_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  static_volume:               # 静态文件卷
+  pgdata:                      # 数据库持久化卷
