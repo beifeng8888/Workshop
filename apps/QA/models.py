@@ -16,7 +16,7 @@ class QA(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='提问用户',
-        related_name='QA'
+        related_name='qa'
     )
     title = models.CharField('问题描述', max_length=128)
     content = models.TextField('详细描述')
@@ -30,5 +30,5 @@ class QA(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title:[20]}...{self.user}"
+        return f"{self.title[:20]}...{self.user}"
 

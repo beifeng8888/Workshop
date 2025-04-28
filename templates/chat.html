@@ -71,6 +71,7 @@
 </div>
 
 <script>
+
 $(document).ready(function(){
     function getCookie(name) {
         let cookieValue = null;
@@ -97,46 +98,85 @@ $(document).ready(function(){
             .replace(/'/g, "&#039;");
     }
 
-    function sendQuestion(){
+    function sendQuestion() {
         const question = $('#user-input').val().trim();
-        if(!question) return;
+        if (!question) return;
 
-        const time = new Date().toLocaleTimeString();
+        // 1. 添加用户消息
         $('#chat-history').append(`
             <div class="user-message">
-                <span class="time">${time}</span>
+                <span class="time">${new Date().toLocaleTimeString()}</span>
                 <strong>You:</strong> ${escapeHtml(question)}
             </div>
         `);
         $('#user-input').val('');
-        $('#chat-history').scrollTop($('#chat-history')[0].scrollHeight);
 
-        $.ajax({
-            url: '/api/get-ai-response/',
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-            headers: { 'X-CSRFToken': csrftoken },
-            data: {question: question},
-            success: function(data) {
-                if (!data.answer) throw new Error("无效的响应格式");
-                $('#chat-history').append(`
-                    <div class="ai-message">
-                        <span class="time">${new Date().toLocaleTimeString()}</span>
-                        <strong>AI:</strong>${escapeHtml(data.answer)}</div>
-                    </div>
-                `);
-                $('#chat-history').scrollTop($('#chat-history')[0].scrollHeight);
+        // 2. 创建AI消息容器（带光标动画）
+        const aiMsgId = 'ai-msg-' + Date.now();
+        $('#chat-history').append(`
+            <div id="${aiMsgId}" class="ai-message">
+                <span class="time">${new Date().toLocaleTimeString()}</span>
+                <strong>AI:</strong> <span class="content">▌</span>
+            </div>
+        `);
+        scrollToBottom();
+
+        // 3. 启动流式请求
+        fetch('/api/get-ai-response/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
             },
-            error: function(xhr) {
-                const errorMsg = xhr.responseJSON?.error || xhr.statusText;
-                $('#chat-history').append(`
-                    <div class="error-message">
-                        ${escapeHtml('错误: 服务暂不可用，请稍后再试' + errorMsg)}
-                    </div>
-                `);
+            body: JSON.stringify({ question })
+        })
+        .then(response => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullContent = '';
+
+            function processStream({ done, value }) {
+                if (done) {
+                    // 流结束时移除光标
+                    $(`#${aiMsgId} .content`).html(escapeHtml(fullContent));
+                    return;
+                }
+
+                // 处理接收到的数据块
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n').filter(l => l.trim());
+
+                lines.forEach(line => {
+                    if (line.startsWith('data:')) {
+                        try {
+                            const data = JSON.parse(line.substring(5));
+
+                            // 实时更新页面
+                            if (data.choices?.[0]?.delta?.content) {
+                                fullContent += data.choices[0].delta.content;
+                                $(`#${aiMsgId} .content`).html(
+                                    escapeHtml(fullContent) + '<span class="blinking-cursor">▌</span>'
+                                );
+                                scrollToBottom();
+                            }
+                        } catch (e) {
+                            console.error('解析错误:', e);
+                        }
+                    }
+                });
+
+                return reader.read().then(processStream);
             }
+
+            return reader.read().then(processStream);
+        })
+        .catch(error => {
+            $(`#${aiMsgId} .content`).html('<span class="text-danger">请求失败，请重试</span>');
         });
+
+        function scrollToBottom() {
+            $('#chat-history').scrollTop($('#chat-history')[0].scrollHeight);
+        }
     }
 
     $('#send-btn').click(sendQuestion);
