@@ -72,8 +72,6 @@ def get_ai_response(request):
 
     except requests.exceptions.RequestException as e:
         error_msg = f"API请求失败: {str(e)}"
-        if hasattr(e, 'response'):
-            error_msg += f" 响应状态: {e.response.status_code}"
         logger.error(error_msg)
         return JsonResponse({'error': error_msg}, status=500)
 
