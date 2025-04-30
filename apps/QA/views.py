@@ -30,7 +30,7 @@ def save_to_db(user, question, answer):
         logger.error(f"数据库保存失败: {str(e)}")
 
 class ChatView(LoginRequiredMixin, TemplateView):
-    template_name = 'chat.html'
+    template_name = 'static/index.html'
 
 @csrf_exempt
 @login_required

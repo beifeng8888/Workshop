@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <!-- 仅修改这一行：将原 <div class="row"> 替换为 React 挂载点 -->
+    <div id="root"></div>
+    <script type="module" src="{% static 'index.js' %}"></script>
+{% endblock %}

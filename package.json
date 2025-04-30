@@ -2,9 +2,12 @@
   "name": "workshop",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/static/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "bun build src/components/index.tsx --outfile src/static/bundle.js && bunx serve dist",
+    "dev": "bun run src/static/index.html",
+    "build": "rm -f src/static/index.*.js && bun build src/components/index.tsx --outdir src/static"
   },
   "repository": {
     "type": "git",
@@ -14,7 +17,17 @@
   "dependencies": {
     "dompurify": "^3.2.5",
     "marked": "^15.0.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "vue-marked": "^0.1.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
   }
 }
