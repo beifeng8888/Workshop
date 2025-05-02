@@ -19110,10 +19110,10 @@ var ChatApp = () => {
   }, [messages]);
   return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
     className: "ai-panel",
-    style: { height: "100vh", width: "33%" },
+    style: { height: "100vh", width: "33vw", display: "inline-block" },
     children: /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
       className: "p-3",
-      style: { height: "100%", display: "flex", flexDirection: "column" },
+      style: { height: "100%", width: "100%", display: "flex", flexDirection: "column" },
       children: [
         /* @__PURE__ */ jsx_dev_runtime.jsxDEV("h2", {
           className: "mb-3",

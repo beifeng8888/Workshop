@@ -179,8 +179,8 @@ const ChatApp:React.FC = () => {
     }, [messages]);
 
     return (
-        <div className="ai-panel" style={{ height: '100vh', width: '33%' }}>
-            <div className="p-3" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className="ai-panel" style={{ height: '100vh', width:"33vw",display:'inline-block' }}>
+            <div className="p-3" style={{ height: '100%', width:'100%',display: 'flex', flexDirection: 'column' }}>
                 <h2 className="mb-3">编程助手</h2>
                 <div
                     ref={chatHistoryRef}
